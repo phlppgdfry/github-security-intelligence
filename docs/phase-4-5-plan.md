@@ -18,7 +18,7 @@ repository advisory that GitHub reviews into the Advisory Database also counts t
 - Honest assessment: **low to medium chance.** The timing side channel in an HMAC hex comparison is real
   but hard to exploit over a network. The malformed-timestamp issue needs a validly signed payload.
   Maintainers may call this hardening rather than a vulnerability. That is their decision to make.
-- Draft private report (to send from your account via *Security → Report a vulnerability*):
+- What was sent (summary; the full reports are in the private advisories):
 
   > **Title:** Webhook signature check uses a non-constant-time comparison and accepts malformed timestamps
   >
