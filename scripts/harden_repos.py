@@ -107,9 +107,10 @@ def ecosystems_in(n: str, branch: str) -> list[tuple[str, str]]:
         if "node_modules/" in path or "/vendor/" in path or path.startswith("vendor/"):
             continue
         name = path.rsplit("/", 1)[-1]
-        if name in MANIFESTS:
+        eco = MANIFESTS.get(name) or ("nuget" if name.endswith((".csproj", ".fsproj", ".sln")) else None)
+        if eco:
             d = "/" + path.rsplit("/", 1)[0] if "/" in path else "/"
-            found.add((MANIFESTS[name], d))
+            found.add((eco, d))
     return sorted(found)
 
 
