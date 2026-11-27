@@ -55,7 +55,8 @@ A lead is a question, not an answer. Two real examples from the first scan (2026
   nothing to correct. The check now ignores yanked releases (`test_yanked_releases_are_not_a_gap`).
 - **praisonai, GHSA-26mh-57q7-jfvr.** Flagged because 4.6.78 was never published to PyPI.
   That alone wouldn't matter, but checking the fix showed that the named file didn't change in
-  4.6.78 and the blamed allowlist is still there in 4.8.2. See
+  4.6.78 and the blamed allowlist is still there in 4.8.2. Submitted as
+  [github/advisory-database#11998](https://github.com/github/advisory-database/pull/11998). See
   [`contributions/GHSA-26mh-57q7-jfvr.md`](contributions/GHSA-26mh-57q7-jfvr.md).
 
 ## Rules this project follows

@@ -1,6 +1,6 @@
 # GHSA-26mh-57q7-jfvr — PraisonAI "Broken AST Sandbox"
 
-Status: **ready to submit** (2026-11-27)
+Status: **submitted, in review** — [github/advisory-database#11998](https://github.com/github/advisory-database/pull/11998) (2026-11-27)
 
 Advisory: https://github.com/advisories/GHSA-26mh-57q7-jfvr
 Upstream: https://github.com/MervinPraison/PraisonAI/security/advisories/GHSA-26mh-57q7-jfvr
@@ -53,6 +53,6 @@ add PR #6368 and the fix commit as references.
 
 ## Outcome
 
-- Submitted: _pending_
-- PR: _pending_
-- Result: _pending_
+- Submitted: 2026-11-27 via "Suggest improvements for this vulnerability"
+- PR: https://github.com/github/advisory-database/pull/11998
+- Result: _waiting for the GitHub curation team_
