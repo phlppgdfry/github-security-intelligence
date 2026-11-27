@@ -7,6 +7,7 @@ import os
 import pathlib
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from typing import Any, Optional
 
@@ -51,7 +52,7 @@ def get_json(
                     body = raw.decode("utf-8", "replace")
                 resp_headers = {k.lower(): v for k, v in resp.headers.items()}
             remaining = resp_headers.get("x-ratelimit-remaining")
-            if remaining is not None and "api.github.com" in url and int(remaining) < RATE_FLOOR:
+            if remaining is not None and urllib.parse.urlsplit(url).hostname == "api.github.com" and int(remaining) < RATE_FLOOR:
                 _store(path, {"status": 200, "body": body, "headers": {k: v for k, v in resp_headers.items() if k in ("link", "etag")}})
                 raise RateLimitLow(f"GitHub API budget down to {remaining}; stopping early")
             break
