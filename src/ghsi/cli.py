@@ -1,6 +1,7 @@
 """ghsi — find, verify and draft improvements to GitHub Advisory Database entries.
 
   ghsi scan  --ecosystem pip --limit 500        leads, written to out/
+  ghsi fixcheck --ecosystem go npm --limit 500  is the fix commit really in the "patched" release?
   ghsi draft GHSA-xxxx-xxxx-xxxx                evidence pack + contribution text for one advisory
 """
 from __future__ import annotations
@@ -62,6 +63,40 @@ def render_markdown(findings, scanned: int, ecosystems: list[str]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def cmd_fixcheck(args: argparse.Namespace) -> int:
+    from .fixcheck import check_fix_in_release, github_compare
+    from .http import get_json
+    compare = github_compare(get_json, sources._gh_headers())
+    advs = [a for eco in args.ecosystem for a in sources.iter_advisories(eco, args.limit, args.published)]
+    print(f"fetched {len(advs)} reviewed advisories", file=sys.stderr)
+    from .http import RateLimitLow
+    results, done = [], 0
+    try:
+        for a in advs:  # sequential on purpose: polite to the API, and stops cleanly at the budget floor
+            results.append(check_fix_in_release(a, compare))
+            done += 1
+    except RateLimitLow as e:
+        print(f"stopped after {done}/{len(advs)} advisories: {e}. Re-run later; results are cached.", file=sys.stderr)
+    advs = advs[:done]
+    findings = sorted((f for r in results for f in r), key=lambda f: (f.confidence != "high", f.ghsa_id))
+    out = pathlib.Path(args.out); out.mkdir(parents=True, exist_ok=True)
+    stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%MZ")
+    rows = [f.__dict__ for f in findings]
+    for r in rows:
+        try:
+            r["open_prs"] = sources.open_prs_for(r["ghsa_id"])
+        except RateLimitLow:
+            r["open_prs"] = [{"number": "?", "url": ""}]
+    (out / f"fixcheck-{stamp}.json").write_text(json.dumps({"scanned": len(advs), "findings": rows}, indent=2))
+    print(f"# Fix-in-release check — {len(advs)} advisories, {len(rows)} leads\n")
+    print("| Confidence | Advisory | Package | Patched | Tag | Status | Commit | Open PRs |\n|---|---|---|---|---|---|---|---|")
+    for r in rows:
+        prs = ", ".join(f"#{p['number']}" for p in r["open_prs"]) or "—"
+        print(f"| {r['confidence']} | {r['ghsa_id']} | {r['package']} | {r['patched']} | {r['tag']} | {r['status']} "
+              f"| [{r['commit'][:9]}](https://github.com/{r['repo']}/commit/{r['commit']}) | {prs} |")
+    return 0
+
+
 def cmd_draft(args: argparse.Namespace) -> int:
     adv = sources.get_advisory(args.ghsa)
     pkgs = _packages_for([adv])
@@ -112,6 +147,12 @@ def main(argv=None) -> int:
     s.add_argument("--min-confidence", default=MEDIUM, choices=[HIGH, MEDIUM, LOW])
     s.add_argument("--out", default="out")
     s.set_defaults(fn=cmd_scan)
+    fc = sub.add_parser("fixcheck", help="check that each fix commit is inside the release called patched")
+    fc.add_argument("--ecosystem", nargs="+", default=["npm", "pip", "go", "rubygems", "composer", "rust", "maven", "nuget"])
+    fc.add_argument("--limit", type=int, default=300, help="advisories per ecosystem, newest first")
+    fc.add_argument("--published", help="date filter, e.g. 2025-01-01..2026-11-27")
+    fc.add_argument("--out", default="out")
+    fc.set_defaults(fn=cmd_fixcheck)
     d = sub.add_parser("draft", help="evidence pack and contribution text for one advisory")
     d.add_argument("ghsa")
     d.set_defaults(fn=cmd_draft)

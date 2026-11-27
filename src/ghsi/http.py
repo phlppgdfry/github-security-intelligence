@@ -19,6 +19,13 @@ class NotFound(Exception):
     pass
 
 
+class RateLimitLow(Exception):
+    """Raised before the GitHub API budget runs dry, so the user's own gh/CI calls keep working."""
+
+
+RATE_FLOOR = int(os.environ.get("GHSI_RATE_FLOOR", "500"))
+
+
 def get_json(
     url: str,
     headers: Optional[dict[str, str]] = None,
@@ -39,11 +46,17 @@ def get_json(
             with urllib.request.urlopen(req, timeout=30) as resp:
                 body = json.loads(resp.read())
                 resp_headers = {k.lower(): v for k, v in resp.headers.items()}
+            remaining = resp_headers.get("x-ratelimit-remaining")
+            if remaining is not None and "api.github.com" in url and int(remaining) < RATE_FLOOR:
+                _store(path, {"status": 200, "body": body, "headers": {k: v for k, v in resp_headers.items() if k in ("link", "etag")}})
+                raise RateLimitLow(f"GitHub API budget down to {remaining}; stopping early")
             break
         except urllib.error.HTTPError as e:
             if e.code == 404:
                 _store(path, {"status": 404})
                 raise NotFound(url) from e
+            if e.code in (403, 429) and e.headers.get("x-ratelimit-remaining") == "0":
+                raise RateLimitLow("GitHub API rate limit exhausted") from e
             if e.code in (403, 429, 500, 502, 503) and attempt < 3:
                 time.sleep(int(e.headers.get("retry-after", 0) or 2 ** (attempt + 1)))
                 continue
