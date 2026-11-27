@@ -41,10 +41,17 @@ Most common CodeQL findings: missing rate limiting on Express routes (69), workf
 `permissions:` block (51), incomplete URL sanitization (17), DOM XSS (13).
 The critical one is a server-side request forgery in `airtable-enterprise-platform/src/client/metadataClient.ts:177`.
 
-## What's left (triage, not configuration)
+## Follow-up done (2026-11-27)
 
-1. Fix the critical SSRF.
-2. Add least-privilege `permissions:` to the 51 workflows. This is mechanical, but each workflow needs
-   checking (Pages deploys and release jobs need write scopes).
-3. Merge Dependabot PRs whose CI passes. Look at major-version bumps (e.g. vite 5 → 8) before merging.
-4. Go through the high CodeQL findings per repo, starting with the portfolio flagships.
+| Item | Result |
+|---|---|
+| Critical SSRF in airtable-enterprise-platform | Fixed in [PR #1](https://github.com/phlppgdfry/airtable-enterprise-platform/pull/1) (merged). IDs must be prefix + letters/digits and are URL-encoded; cursor/limit are validated integers; 8 new tests; the alert is gone on the PR ref. |
+| 51 `missing-workflow-permissions` alerts (37 workflow files, 33 repos) | `scripts/workflow_permissions.py` inferred each workflow's needs and added a top-level `permissions:` block: `contents: read` for all 37. Two were checked by hand (a `git push` to GitLab with its own token, and a build-time read of public GitHub data). CI after the change: 32 success; 1 pre-existing failure (buffer-ai-content-operations, failing since 2026-11-07); 1 Playwright failure caused by `ubuntu-latest` moving to 26.04, fixed by pinning `ubuntu-24.04`. |
+
+## Still open (ongoing maintenance, not configuration)
+
+1. Merge the Dependabot PRs as they arrive. Check major-version bumps (e.g. vite 5 → 8) first. When a PR has a
+   stale lockfile, comment `@dependabot recreate`.
+2. Go through the remaining high CodeQL findings per repo, starting with the portfolio flagships. Most are
+   missing rate limiting on demo Express servers and URL-sanitization checks.
+3. buffer-ai-content-operations: its own tests have failed since 2026-11-07. This is unrelated to security.

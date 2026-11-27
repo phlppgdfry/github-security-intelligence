@@ -7,7 +7,10 @@ publishes it and chooses the credits. A merged security PR alone gives no credit
 repository advisory that GitHub reviews into the Advisory Database also counts toward the
 *Security advisory credit* badge.
 
-### Track A — ElevenLabs webhook verification (ready, needs your OK to send)
+### Track A — ElevenLabs webhook verification: **sent 2026-11-27**, in triage
+
+- Private reports: elevenlabs-js `GHSA-w5h4-c893-399x`, elevenlabs-python `GHSA-h775-qrfx-rqmm` (severity low, CWE-208 + CWE-20).
+  Only the maintainers can see them. They decide whether to publish, and the credit follows if they do.
 
 - PRs: elevenlabs/elevenlabs-js#509 and elevenlabs/elevenlabs-python#947. Both are open with no
   maintainer review yet.
@@ -26,6 +29,18 @@ repository advisory that GitHub reviews into the Advisory Database also counts t
   > would let users of older SDK versions know to upgrade. I'm happy to be credited as remediation developer.
 
 ### Track B — find something new with the tools from phase 2 and 3 (strongest route)
+
+**First hunt (2026-11-27): no reportable finding.** CodeQL security-extended on two active projects that accept
+private reports:
+- SignalK/signalk-server @ c8f0ddd: 276 results. The 30 strongest were triaged by hand. Path injection is
+  guarded by a strict regex. The SSRF is an admin-only, by-design issuer test. The "auth bypass" alerts
+  are normal `jwt.verify` flows. The reflected text in a DELETE 401 can't be triggered cross-site.
+- flytohub/flyto-core @ 71cb047: 16 results. The tar-slip alert points at code that is already hardened (the fix
+  of an earlier advisory). The rest are test fixtures.
+
+Lesson: projects with several recent advisories have often just been audited thoroughly. For the next hunt,
+use **variant analysis**: take a recently fixed bug in a project and look for the same mistake elsewhere in
+that codebase and in similar projects.
 
 1. Use CodeQL (now familiar from phase 3) on actively maintained open-source projects that have private
    vulnerability reporting enabled. Start with the query classes it found in our own code: SSRF, URL
