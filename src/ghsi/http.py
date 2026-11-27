@@ -44,7 +44,11 @@ def get_json(
     for attempt in range(4):
         try:
             with urllib.request.urlopen(req, timeout=30) as resp:
-                body = json.loads(resp.read())
+                raw = resp.read()
+                try:
+                    body = json.loads(raw)
+                except ValueError:  # raw file contents (Accept: application/vnd.github.raw)
+                    body = raw.decode("utf-8", "replace")
                 resp_headers = {k.lower(): v for k, v in resp.headers.items()}
             remaining = resp_headers.get("x-ratelimit-remaining")
             if remaining is not None and "api.github.com" in url and int(remaining) < RATE_FLOOR:

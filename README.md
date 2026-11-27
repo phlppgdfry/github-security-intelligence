@@ -23,6 +23,7 @@ npm + PyPI registries ─┘                 │
 ```bash
 uv sync
 uv run ghsi scan --ecosystem pip npm --limit 300     # writes out/scan-<time>.{md,json}
+uv run ghsi fixcheck --ecosystem npm pip go --limit 400  # is the fix commit inside the "patched" release?
 uv run ghsi draft GHSA-xxxx-xxxx-xxxx                # evidence pack + contribution template
 ```
 
@@ -45,6 +46,21 @@ in `~/.cache/ghsi` (6 h for registries, 1 h for advisories) so repeated runs sta
 Leads that already have an **open PR** in `github/advisory-database` are marked, so nobody
 duplicates work the curators are already reviewing.
 
+## Fix-in-release check
+
+`ghsi fixcheck` works for any ecosystem from git alone: for each advisory with a fix-commit reference, it
+finds the tag of the "patched" version and asks GitHub whether the tag contains the commit. If the release
+*predates* the fix, everyone on that release is told they're safe when they aren't.
+
+Ancestry is only a first filter. `ghsi.verifyfix` then checks whether the fix's added source lines are in
+the release, and a human confirms against the published artifact (crate, wheel, tarball).
+
+Of the 64 high-confidence leads in the first run (2,400 advisories), most were explained on inspection:
+monorepo tags that belong to another package (highcharts, jhipster, libp2p), security releases shipped
+through a separate commit (Symfony), deliberate maintainer choices written in the advisory (nuxt: a
+dependency floor already fixed 4.4.4), and git tags that don't match the published artifact (ag-psd).
+Two were real errors, both submitted: Snipe-IT and deepseek-tui.
+
 ## What verification taught the tool
 
 A lead is a question, not an answer. Two real examples from the first scan (2026-11-27):
@@ -58,6 +74,10 @@ A lead is a question, not an answer. Two real examples from the first scan (2026
   4.6.78 and the blamed allowlist is still there in 4.8.2. Submitted as
   [github/advisory-database#11998](https://github.com/github/advisory-database/pull/11998). See
   [`contributions/GHSA-26mh-57q7-jfvr.md`](contributions/GHSA-26mh-57q7-jfvr.md).
+- **Snipe-IT, GHSA-fc33-6w3q-538h.** "Patched in 8.6.1", but the permission checks only arrived in
+  8.6.2. Submitted as [#12000](https://github.com/github/advisory-database/pull/12000).
+- **deepseek-tui, GHSA-62f5-cp2p-vq95.** The published 0.8.41 crate still contains the vulnerable code,
+  but the range excluded it. Submitted as [#11999](https://github.com/github/advisory-database/pull/11999).
 
 ## Rules this project follows
 
