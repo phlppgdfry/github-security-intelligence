@@ -1,0 +1,20 @@
+# Roadmap: GitHub security recognition, step by step
+
+Status per phase. Facts are checked against GitHub's docs and real advisory data; dates are
+targets, not guarantees.
+
+| # | Goal | Status | Evidence / next step |
+|---|---|---|---|
+| 1 | **Developer Program Member** badge | ✅ already earned | Shown on the profile (octicon `cpu`). Requirement: an integration using the GitHub API plus a support email. This repo and `github-stars` both qualify. |
+| 2 | **Security advisory credit** (as *analyst*) | 🔄 in progress | Merged community PRs to `github/advisory-database` get the submitter credited as `analyst` (checked on GHSA-23m2-mghx-vqmf, GHSA-cpwx-vrp4-4pq7, GHSA-5cjw-f85j-cv6r, GHSA-gcqx-w48m-w2h4). First lead: GHSA-26mh-57q7-jfvr. |
+| 3 | Security engineering on own repos | ⏳ | CodeQL, Dependabot, secret scanning and push protection on all public repos; Semgrep in CI for one flagship. |
+| 4 | Remediation credits in open source | ⏳ | Maintainers can credit `remediation_developer` / `remediation_verifier` on a GHSA. Candidates: the open webhook-signature PRs (elevenlabs-js#509, elevenlabs-python#947), but only if the maintainers treat them as security fixes. |
+| 5 | **Security Bug Bounty Hunter** badge | ⏳ long-term | Only through a valid report to GitHub's own program (HackerOne), inside its rules, using your own test accounts. Train first: PortSwigger Academy, Hacker101. No date promised. |
+
+## Phase 2 working loop
+
+1. `ghsi scan` → pick high/medium leads with no open PR.
+2. Prove it: tag compare / fix commit / release notes / registry page.
+3. `ghsi draft GHSA-…` → fill in the "Reason for change" with the links.
+4. Submit through **Suggest improvements for this vulnerability** on github.com (your own account).
+5. Log it in `contributions/` with the PR link and the outcome.
