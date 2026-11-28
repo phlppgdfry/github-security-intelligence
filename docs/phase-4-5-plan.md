@@ -53,10 +53,32 @@ that codebase and in similar projects.
 Rules: never test against someone else's live service, never publish details before the fix, and
 respect the project's SECURITY.md.
 
-### Track C — keep the Advisory Database work going
+### Track B — closed 2026-11-28
 
-Wait for the curators' response to #11998/#11999/#12000 first, then repeat the `ghsi fixcheck` loop at a
-calm pace (a few proven PRs a month).
+Two projects were fully audited (above); everything found was a false positive or already fixed. Deeper
+variant analysis of third-party sandbox code kept getting stopped by the model's safety filter, so this
+direction is closed. The credit route that works is Track C.
+
+### Track C — Advisory Database corrections: **round 2 sent 2026-11-28**
+
+Round 2 targets the most harmful data error: releases that are vulnerable but outside the range, so
+Dependabot stays silent for them. Found with `ghsi scan`, proven with git ancestry + code at the tag +
+the published artifact, then automated as `ghsi scan --verify-gaps`.
+
+| PR | Advisory | Unflagged releases | Correction |
+|---|---|---|---|
+| [#12019](https://github.com/github/advisory-database/pull/12019) | GHSA-53v6-4h7p-p4gj music-metadata (APEv2) | 11.13.0, 11.14.0, 11.15.0 | `<= 11.12.3` → `< 11.16.0` |
+| [#12020](https://github.com/github/advisory-database/pull/12020) | GHSA-jjpr-9cvf-cq55 music-metadata (ID3v2) | 11.13.0, 11.14.0, 11.15.0 | `<= 11.12.3` → `< 11.16.0` |
+| [#12021](https://github.com/github/advisory-database/pull/12021) | GHSA-p6vx-979v-rg4c seroval (critical) | 1.6.1 | `>= 0.12.0, <= 1.6.0` → `< 1.6.2` |
+| [#12022](https://github.com/github/advisory-database/pull/12022) | GHSA-4ghv-53cq-7wp3 Home Assistant | 2026.2.2 | `< 2026.2.2` → `< 2026.2.3` |
+
+Each diff removes one stale `last_known_affected_version_range`. Leads rejected this round, with reasons:
+electrum (the PyPI name is a placeholder), opencve 3.0.0 and Etherpad 3.3.3 (not distributed on the
+registry; the range already covers everything that is), GeoNode/vyper (yanked patch has a `.post1`
+replacement or is ancient), tinymce 7.9.4 (commercial LTS release by design), praisonai 4.6.78 (cosmetic
+unless the fix is missing; #11998 covers the real case), mistune (someone else's PR #10673 is open).
+
+Next: wait for the curators' response, then repeat at a calm pace (a few proven PRs a month).
 
 ## Phase 5 — GitHub Security Bug Bounty Hunter
 
