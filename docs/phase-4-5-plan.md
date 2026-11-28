@@ -78,6 +78,14 @@ registry; the range already covers everything that is), GeoNode/vyper (yanked pa
 replacement or is ancient), tinymce 7.9.4 (commercial LTS release by design), praisonai 4.6.78 (cosmetic
 unless the fix is missing; #11998 covers the real case), mistune (someone else's PR #10673 is open).
 
+Fixcheck round 2 (1,100 advisories published 2026-05-01..2026-11-08, npm/pip/go/composer/maven): 46 high
+leads, **0 new submissions**. All explained: Symfony security releases via separate commits; monorepo tags that
+belong to another package (highcharts, apostrophe → sanitize-html/import-export, vitest → vite-plus,
+langgraph → langgraph-sdk, strands: the real tag is `typescript/v1.5.0`); maintenance lines the main-branch
+commit was never meant to reach (http4k 4.x/5.x LTS, seroval `< 1.0.0`); better-auth kysely-adapter (fix
+commit only touches the drizzle adapter); nuxt and Snipe-IT were handled in round 1. The gap check
+(`--verify-gaps`) gives far fewer false positives than ancestry alone, so start there next round.
+
 Next: wait for the curators' response, then repeat at a calm pace (a few proven PRs a month).
 
 ## Phase 5 — GitHub Security Bug Bounty Hunter
