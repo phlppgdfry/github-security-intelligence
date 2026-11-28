@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Question or idea
+    url: https://github.com/phlppgdfry/github-security-intelligence/discussions
+    about: Ask how something works or propose a new check.
+  - name: Security issue in this tool
+    url: https://github.com/phlppgdfry/github-security-intelligence/security/advisories/new
+    about: Please report privately.

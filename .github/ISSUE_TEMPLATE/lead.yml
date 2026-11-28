@@ -1,0 +1,30 @@
+name: Explained lead (false positive)
+description: You verified a lead and it is NOT an error. Tell us why, so the check gets smarter.
+labels: [false positive]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Found a real error instead? Don't file it here: submit it to github/advisory-database yourself
+        (see docs/first-advisory-credit.md), then optionally link the PR below.
+  - type: input
+    id: advisory
+    attributes:
+      label: Advisory
+      placeholder: GHSA-xxxx-xxxx-xxxx
+    validations:
+      required: true
+  - type: input
+    id: check
+    attributes:
+      label: Check that flagged it
+      placeholder: unclassified_versions / patch_not_published / fixcheck behind / ...
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it's not an error (with sources)
+      description: e.g. yanked releases, monorepo tag belongs to another package, fix shipped via a separate security commit.
+    validations:
+      required: true

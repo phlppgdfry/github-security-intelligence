@@ -1,0 +1,26 @@
+name: Bug report
+description: The tool crashed, or a check flagged something it shouldn't (or missed something it should).
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Command you ran, what you expected, what you got.
+    validations:
+      required: true
+  - type: input
+    id: advisory
+    attributes:
+      label: Advisory (if any)
+      placeholder: GHSA-xxxx-xxxx-xxxx
+  - type: textarea
+    id: output
+    attributes:
+      label: Output or traceback
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: ghsi commit / Python version
+      placeholder: "git rev-parse --short HEAD; python --version"

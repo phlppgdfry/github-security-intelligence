@@ -18,6 +18,14 @@ npm + PyPI registries ─┘                 │
                    ghsi draft GHSA-… ──► "Suggest improvements" on github.com
 ```
 
+## Contribute: earn your first advisory credit
+
+Every lead is a question a human has to answer. Verify one, and if the data really is wrong, submit the
+correction from your own account: when GitHub merges it you're credited as an **analyst** on the
+advisory. Step-by-step with a real example: [docs/first-advisory-credit.md](docs/first-advisory-credit.md).
+Code contributions are welcome too: see [CONTRIBUTING.md](CONTRIBUTING.md) and the
+[`good first issue`](https://github.com/phlppgdfry/github-security-intelligence/labels/good%20first%20issue) label.
+
 ## Install and run
 
 ```bash
