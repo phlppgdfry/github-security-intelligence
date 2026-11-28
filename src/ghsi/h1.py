@@ -197,6 +197,18 @@ def scope_cache_path(handle: str) -> pathlib.Path:
 
 
 def load_scope(handle: str = "github", refresh: bool = False, client: Optional[Client] = None) -> tuple[list[ScopeEntry], str]:
+    """HackerOne scope plus, for GitHub, the subdomain wildcards from bounty.github.com.
+
+    HackerOne lists `github.com` and `npmjs.com` as single URLs, while bounty.github.com/scope says
+    "all subdomains". Explicit HackerOne entries are more specific than those wildcards, so an
+    out-of-scope host such as `enterprise.github.com` still loses."""
+    entries, src = _load_scope(handle, refresh, client)
+    if handle == "github" and src != "builtin":
+        entries = entries + [e for e in builtin_github_scope() if e.asset_type == "WILDCARD"]
+    return entries, src
+
+
+def _load_scope(handle: str, refresh: bool, client: Optional[Client]) -> tuple[list[ScopeEntry], str]:
     """Scope from HackerOne (cached 6 h). Without credentials, fall back to the last cache, then the built-in copy."""
     path = scope_cache_path(handle)
     if not refresh and path.exists() and time.time() - path.stat().st_mtime < SCOPE_TTL:

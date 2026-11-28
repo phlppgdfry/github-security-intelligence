@@ -100,3 +100,18 @@ def test_env_credentials_win(monkeypatch):
     monkeypatch.setenv("HACKERONE_API_IDENTIFIER", "x")
     monkeypatch.setenv("HACKERONE_API_TOKEN", "y")
     assert h1.load_credentials() == h1.Credentials("x", "y")
+
+
+def test_github_scope_merges_bounty_page_wildcards(tmp_path, monkeypatch):
+    """HackerOne lists github.com/npmjs.com without wildcards; bounty.github.com says all subdomains."""
+    import json
+    monkeypatch.setattr(h1, "CACHE_DIR", tmp_path)
+    live = [ScopeEntry("URL", "github.com", True, True, "critical"), ScopeEntry("URL", "npmjs.com", True, True, "critical"),
+            ScopeEntry("URL", "enterprise.github.com", False, False, "none"), ScopeEntry("URL", "*.github.io", False, False)]
+    h1.scope_cache_path("github").write_text(json.dumps({"entries": [vars(e) for e in live]}))
+    entries, src = h1.load_scope("github")
+    assert src == "cache"
+    assert check_target("https://registry.npmjs.org", entries).status == "in-scope"
+    assert check_target("https://copilot.github.com", entries).status == "in-scope"
+    assert check_target("https://enterprise.github.com", entries).status == "out-of-scope"
+    assert check_target("https://someone.github.io", entries).status == "out-of-scope"

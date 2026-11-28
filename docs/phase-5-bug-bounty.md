@@ -12,14 +12,30 @@ live HackerOne scope (`ghsi h1 scope --refresh`) takes priority over the offline
 
 | Piece | What it does | Status |
 |---|---|---|
-| **Burp Suite Community** 2026.11.3 (`brew install --cask burp-suite`) | Proxy, Repeater, Decoder, Comparer, the built-in Academy tab with Burp's browser | installed |
+| **Burp Suite** 2026.11.3 (`brew install --cask burp-suite`) | Proxy, Repeater, Intruder, Scanner, Burp AT, the built-in Academy tab with Burp's browser | Professional through the Black Friday 2026 free offer (logged in); falls back to Community when that ends |
 | **Burp MCP Server** (official PortSwigger BApp 1.4.0) | Lets Claude read your proxy history and send requests through Repeater. Every HTTP request and every read of project data needs your **approval** inside Burp, and config-editing tools are off | loaded, `http://127.0.0.1:9876/mcp` |
-| **`ghsi h1`** (this repo) | HackerOne login (Keychain), scope guard, your own reports, GitHub's rules as checklists, report draft and lint | built, 21 tests |
+| **`ghsi h1`** (this repo) | HackerOne login (Keychain), scope guard, your own reports, GitHub's rules as checklists, report draft and lint | logged in as `phlppgdfryy` (2026-11-28); live scope 39 assets, 27 bounty-eligible |
 | **`ghsi-mcp`** (this repo) | The same functions as a local, **read-only** MCP server. It cannot submit or comment | registered as `hackerone` |
 
 Both MCP servers are listed in the shared agent-tools catalog (`burp`, `hackerone`) and active in the
 `software-engineering`, `security-audit` and new `bug-bounty` profiles. The Burp server only answers
 while Burp Suite is open.
+
+HackerOne's structured scope lists `github.com` and `npmjs.com` as single URLs, while
+bounty.github.com/scope says "all subdomains". For the `github` program `ghsi` adds those wildcards.
+HackerOne's explicit out-of-scope entries (`enterprise.github.com`, `*.github.io`, `shop.github.com` …)
+are more specific, so they still win.
+
+### Test accounts (create in a private window: password, CAPTCHA and email code are yours)
+
+| Account | Email | Role in tests |
+|---|---|---|
+| `phlppgdfryy-a` | `phlppgdfryy+a@wearehackerone.com` | attacker / org member |
+| `phlppgdfryy-b` | `phlppgdfryy+b@wearehackerone.com` | victim / org owner of the test org |
+| test org `phlppgdfryy-h1-lab` | owned by `-b` | private repos, teams, roles, apps |
+
+Mail to the alias arrives in the inbox of your HackerOne account. Turn on 2FA for both accounts,
+and never reuse your main account's password.
 
 Why I built our own HackerOne client instead of using a community MCP: the Hacker API token can
 read all your reports, including unfixed vulnerabilities. Our client sends that token only to
