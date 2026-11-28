@@ -7,8 +7,12 @@ requires-python = ">=3.11"
 license = "MIT"
 dependencies = ["packaging>=24"]
 
+[project.optional-dependencies]
+mcp = ["mcp>=2.3,<3"]
+
 [project.scripts]
 ghsi = "ghsi.cli:main"
+ghsi-mcp = "ghsi.mcp_server:main"
 
 [dependency-groups]
 dev = ["pytest>=8"]
