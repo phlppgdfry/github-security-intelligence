@@ -52,7 +52,10 @@ def get_json(
                     body = raw.decode("utf-8", "replace")
                 resp_headers = {k.lower(): v for k, v in resp.headers.items()}
             remaining = resp_headers.get("x-ratelimit-remaining")
-            if remaining is not None and urllib.parse.urlsplit(url).hostname == "api.github.com" and int(remaining) < RATE_FLOOR:
+            # The floor protects the 5,000/h core budget. Other buckets (search: 30/min) are far
+            # smaller than the floor, so applying it there would stop every run at the first call.
+            if (remaining is not None and urllib.parse.urlsplit(url).hostname == "api.github.com"
+                    and resp_headers.get("x-ratelimit-resource", "core") == "core" and int(remaining) < RATE_FLOOR):
                 _store(path, {"status": 200, "body": body, "headers": {k: v for k, v in resp_headers.items() if k in ("link", "etag")}})
                 raise RateLimitLow(f"GitHub API budget down to {remaining}; stopping early")
             break

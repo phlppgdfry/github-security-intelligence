@@ -61,6 +61,18 @@ through a separate commit (Symfony), deliberate maintainer choices written in th
 dependency floor already fixed 4.4.4), and git tags that don't match the published artifact (ag-psd).
 Two were real errors, both submitted: Snipe-IT and deepseek-tui.
 
+## Gap check
+
+`ghsi scan --verify-gaps` takes every `unclassified_versions` lead (published releases between the range
+and the patch) and asks git whether any fix commit is in those releases. If none is and the patched
+release has one, the lead becomes **high**: those releases are vulnerable and nobody is alerted.
+
+Behind it is a recurring pattern: the range is copied from a "last known affected" version written when the
+report came in, and the maintainer ships a few more releases before the fix. Round 2 (2026-11-28) found
+four of these: music-metadata 11.13–11.15 (twice; the advisory itself says 11.15.0 is vulnerable),
+seroval 1.6.1 (critical; no git tags, proven from the npm tarballs) and Home Assistant 2026.2.2
+([#12019](https://github.com/github/advisory-database/pull/12019)–[#12022](https://github.com/github/advisory-database/pull/12022)).
+
 ## What verification taught the tool
 
 A lead is a question, not an answer. Two real examples from the first scan (2026-11-27):

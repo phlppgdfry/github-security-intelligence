@@ -34,6 +34,17 @@ def cmd_scan(args: argparse.Namespace) -> int:
     print(f"fetched {len(advs)} reviewed advisories", file=sys.stderr)
     pkgs = _packages_for(advs)
     findings = [f for a in advs for f in check_advisory(a, pkgs)]
+    if args.verify_gaps:
+        from .fixcheck import github_compare
+        from .gaps import verify_gap
+        from .http import RateLimitLow, get_json
+        compare = github_compare(get_json, sources._gh_headers())
+        by_id = {a["ghsa_id"]: a for a in advs}
+        try:
+            for f in findings:
+                verify_gap(f, by_id[f.ghsa_id], compare)
+        except RateLimitLow as e:
+            print(f"gap verification stopped early: {e}", file=sys.stderr)
     findings = [f for f in findings if ORDER[f.confidence] <= ORDER[args.min_confidence]]
     findings.sort(key=lambda f: (ORDER[f.confidence], f.check, f.ghsa_id))
 
@@ -146,6 +157,8 @@ def main(argv=None) -> int:
     s.add_argument("--limit", type=int, default=300, help="advisories per ecosystem, newest first")
     s.add_argument("--published", help="date filter, e.g. 2026-01-01..2026-11-27")
     s.add_argument("--min-confidence", default=MEDIUM, choices=[HIGH, MEDIUM, LOW])
+    s.add_argument("--verify-gaps", action="store_true",
+                   help="check with git whether unclassified releases lack the fix (upgrades proven gaps to high)")
     s.add_argument("--out", default="out")
     s.set_defaults(fn=cmd_scan)
     fc = sub.add_parser("fixcheck", help="check that each fix commit is inside the release called patched")

@@ -60,11 +60,34 @@ def get_advisory(ghsa_id: str) -> dict:
     return get_json(f"{API}/advisories/{ghsa_id}", _gh_headers(), ttl=3600)
 
 
+_OPEN_PR_INDEX: Optional[dict[str, list[dict]]] = None
+_GHSA = re.compile(r"GHSA(?:-[23456789cfghjmpqrvwx]{4}){3}")
+
+
+def open_prs_index() -> dict[str, list[dict]]:
+    """Every open PR in github/advisory-database, keyed by the GHSA ids in its title.
+
+    One paged list (~20 calls) instead of one search per advisory: the search API allows only
+    30 requests a minute, which made larger scans stop early."""
+    global _OPEN_PR_INDEX
+    if _OPEN_PR_INDEX is None:
+        index: dict[str, list[dict]] = {}
+        url: Optional[str] = f"{API}/repos/github/advisory-database/pulls?state=open&per_page=100"
+        while url:
+            body, headers = get_json(url, _gh_headers(), ttl=1800, with_headers=True)
+            for pr in body:
+                for ghsa in set(_GHSA.findall(pr["title"])):
+                    index.setdefault(ghsa, []).append(
+                        {"number": pr["number"], "title": pr["title"], "url": pr["html_url"]})
+            m = _NEXT.search(headers.get("link", ""))
+            url = m.group(1) if m else None
+        _OPEN_PR_INDEX = index
+    return _OPEN_PR_INDEX
+
+
 def open_prs_for(ghsa_id: str) -> list[dict]:
     """Open community PRs in github/advisory-database that already touch this advisory."""
-    q = urllib.parse.quote(f"repo:github/advisory-database is:pr is:open {ghsa_id}")
-    body = get_json(f"{API}/search/issues?q={q}", _gh_headers(), ttl=1800)
-    return [{"number": i["number"], "title": i["title"], "url": i["html_url"]} for i in body.get("items", [])]
+    return open_prs_index().get(ghsa_id, [])
 
 
 @dataclass
