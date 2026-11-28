@@ -79,6 +79,19 @@ A lead is a question, not an answer. Two real examples from the first scan (2026
 - **deepseek-tui, GHSA-62f5-cp2p-vq95.** The published 0.8.41 crate still contains the vulnerable code,
   but the range excluded it. Submitted as [#11999](https://github.com/github/advisory-database/pull/11999).
 
+## Bug bounty toolkit (`ghsi h1`)
+
+Read-only HackerOne Hacker API client for GitHub's bug bounty program. It has a scope guard that
+rejects unlisted, look-alike and third-party hosts, GitHub's rules as checklists, and report drafts
+plus a lint step that catches leaked tokens, PII and off-site media. It never submits: you do that
+on HackerOne yourself. Also available as a local MCP server (`uv run --extra mcp ghsi-mcp`). Setup and
+training route: [docs/phase-5-bug-bounty.md](docs/phase-5-bug-bounty.md).
+
+```sh
+uv run ghsi h1 check https://gist.github.com https://blog.github.com   # IN SCOPE / OUT
+uv run ghsi h1 rules
+```
+
 ## Rules this project follows
 
 - Facts only: versions, package names, references. No severity opinions without a source.

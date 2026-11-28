@@ -3,6 +3,7 @@
   ghsi scan  --ecosystem pip --limit 500        leads, written to out/
   ghsi fixcheck --ecosystem go npm --limit 500  is the fix commit really in the "patched" release?
   ghsi draft GHSA-xxxx-xxxx-xxxx                evidence pack + contribution text for one advisory
+  ghsi h1 check https://gist.github.com         bug bounty scope guard (also: login, scope, reports, rules, draft, lint)
 """
 from __future__ import annotations
 
@@ -156,6 +157,8 @@ def main(argv=None) -> int:
     d = sub.add_parser("draft", help="evidence pack and contribution text for one advisory")
     d.add_argument("ghsa")
     d.set_defaults(fn=cmd_draft)
+    from . import h1_cli
+    h1_cli.register(sub)
     args = p.parse_args(argv)
     return args.fn(args)
 
